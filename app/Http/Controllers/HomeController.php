@@ -5,18 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 
-class HomeController extends Controller
+class HomeController extends BaseController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /**
      * Show the application dashboard.
      *
@@ -24,6 +14,51 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        return view('home.index');
+    }
+    
+    /**
+     * Show test websockets panel
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function websockets()
+    {
+        
+        $game = \App\Game::find(1);
+        $players = [];
+        foreach ($game->userGames as $userGame) {
+            $players[] = [
+                'login' => $userGame->user->name,
+                'id'    => $userGame->user->id,
+                'color'  => $userGame->color
+            ];
+        }
+        $white = [];
+        $black = [];
+        foreach ($game->boardInfos as $boradInfo) {
+            $boradInfoData = [
+                'type'     => $boradInfo->figure,
+                'position' => $boradInfo->position,
+                'id'       => $boradInfo->id,
+            ];
+            if ($boradInfo->color) {
+                $black[] = $boradInfoData;
+            } else {
+                $white[] = $boradInfoData;
+            }
+        }
+        \App\Sockets\PushServerSocket::setDataToServer([
+            'name' => 'init',
+            'data' => [
+               'game' => $game->id,
+               'turn' => 0,
+               'users' => $players,
+               'black' => $black,
+               'white' => $white,
+            ]
+        ]);
+         
+        return view('home.websockets');
     }
 }

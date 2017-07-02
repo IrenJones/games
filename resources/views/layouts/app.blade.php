@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="csrf-token" content="{{csrf_token()}}">
     <title>Laravel</title>
 
     <!-- Fonts -->
@@ -49,9 +49,25 @@
                 <ul class="nav navbar-nav">
                     <li><a href="{{ url('/home') }}">Home</a></li>
                 </ul>
+                <ul class="nav navbar-nav" >
+                    <li><a href="{{ url('/search') }}">Search</a></li>
+                </ul>
 
                 <!-- Right Side Of Navbar -->
                 <ul class="nav navbar-nav navbar-right">
+                    @if ( Auth::check() )
+                        <li><a>
+                            <div id="statusContent">
+                                @if ($currentGameStatus ===  App\User::NO_GAME )
+                                nogame
+                                @elseif ($currentGameStatus === App\User::SEARCH_GAME)
+                                search
+                                @elseif ($currentGameStatus === App\User::LIVE_GAME)
+                                live
+                                @endif
+                            </div>
+                        </a></li>
+                    @endif
                     <!-- Authentication Links -->
                     @if (Auth::guest())
                         <li><a href="{{ url('/login') }}">Login</a></li>
@@ -73,10 +89,11 @@
     </nav>
 
     @yield('content')
-
+    @yield('status')
     <!-- JavaScripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     {{-- <script src="{{ elixir('js/app.js') }}"></script> --}}
+    @yield('scripts')
 </body>
 </html>
